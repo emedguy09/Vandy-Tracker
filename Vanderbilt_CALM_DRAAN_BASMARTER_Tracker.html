@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vanderbilt Skills Tracker</title>
+<style>
+:root{
+  --bg:#f6f7f9;--card:#ffffff;--text:#111827;--muted:#6b7280;--line:#d1d5db;
+  --accent:#2563eb;--danger:#dc2626;--ok:#047857;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+header{position:sticky;top:0;background:var(--card);border-bottom:1px solid var(--line);padding:14px 16px;z-index:10}
+h1{font-size:20px;margin:0}
+small{color:var(--muted)}
+main{padding:14px;max-width:900px;margin:0 auto 80px}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:10px 0}
+.tab{border:1px solid var(--line);background:var(--card);padding:9px 12px;border-radius:999px;white-space:nowrap}
+.tab.active{background:var(--accent);color:white;border-color:var(--accent)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+label{font-weight:650;font-size:14px;display:block;margin-top:10px}
+input,select,textarea{width:100%;font-size:16px;border:1px solid var(--line);border-radius:10px;padding:10px;background:white;margin-top:5px}
+textarea{min-height:88px;resize:vertical}
+button{font-size:16px;border:0;border-radius:10px;padding:10px 13px;background:var(--accent);color:white;margin:6px 4px 6px 0}
+button.secondary{background:#374151}
+button.light{background:#e5e7eb;color:#111827}
+button.danger{background:var(--danger)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hidden{display:none}
+.entry{border-left:5px solid var(--accent)}
+.entry h3{margin:0 0 4px;font-size:17px}
+.meta{font-size:13px;color:var(--muted);margin-bottom:8px}
+pre{white-space:pre-wrap;font-family:inherit;margin:6px 0;line-height:1.35}
+.score{display:flex;gap:8px;flex-wrap:wrap}
+.score input{width:auto}
+.badge{display:inline-block;background:#eef2ff;color:#3730a3;border-radius:999px;padding:3px 8px;font-size:12px;margin:2px 2px 2px 0}
+.actions{display:flex;flex-wrap:wrap}
+.footer{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:8px 14px;font-size:12px;color:var(--muted)}
+@media(max-width:650px){.row{grid-template-columns:1fr}main{padding:10px}.card{border-radius:12px}}
+@media print{
+  header,.tabs,.footer,.no-print,button,input,select{display:none!important}
+  body{background:white}
+  .card{box-shadow:none;border:1px solid #999;break-inside:avoid}
+  main{margin:0;padding:0}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Vanderbilt Skills Tracker</h1>
+  <small>CALM • DRAAN • BASMARTER • Review Log</small>
+</header>
+
+<main>
+  <div class="tabs no-print">
+    <button class="tab active" onclick="showTab('calm', this)">CALM</button>
+    <button class="tab" onclick="showTab('draan', this)">DRAAN</button>
+    <button class="tab" onclick="showTab('basmarter', this)">BASMARTER</button>
+    <button class="tab" onclick="showTab('review', this)">Review</button>
+    <button class="tab" onclick="showTab('settings', this)">Backup</button>
+  </div>
+
+  <section id="calm" class="panel">
+    <div class="card">
+      <h2>New CALM Entry</h2>
+      <div class="row">
+        <div><label>Title / Situation</label><input id="calm_title" placeholder="Example: Rowen meltdown before bed"></div>
+        <div><label>Person / Setting</label><input id="calm_person" placeholder="Rowen, Colleen, staff, patient..."></div>
+      </div>
+      <label>Trigger / What happened?</label><textarea id="calm_trigger"></textarea>
+      <label>Connect</label><textarea id="calm_connect" placeholder="How did I show empathy, respect, validation, or curiosity?"></textarea>
+      <label>Assess</label><textarea id="calm_assess" placeholder="What was really going on? What emotions, needs, risks, or assumptions were present?"></textarea>
+      <label>Lead</label><textarea id="calm_lead" placeholder="How did I guide the interaction toward a better next step?"></textarea>
+      <label>Manage</label><textarea id="calm_manage" placeholder="How did I regulate myself and follow through?"></textarea>
+      <label>Outcome / Learning</label><textarea id="calm_outcome"></textarea>
+      <label>Self-rating</label>
+      <select id="calm_rating"><option>1 - Poor</option><option>2</option><option>3 - Okay</option><option>4</option><option>5 - Strong</option></select>
+      <button onclick="saveCALM()">Save CALM</button>
+      <button class="light" onclick="clearCALM()">Clear</button>
+    </div>
+  </section>
+
+  <section id="draan" class="panel hidden">
+    <div class="card">
+      <h2>New DRAAN Entry</h2>
+      <div class="row">
+        <div><label>Title / Request</label><input id="draan_title" placeholder="Example: Asking staff to close loop on labs"></div>
+        <div><label>Person / Setting</label><input id="draan_person" placeholder="Colleague, nurse, admin, family..."></div>
+      </div>
+      <label>Deposit</label><textarea id="draan_deposit" placeholder="Relational deposit: respect, appreciation, shared goal."></textarea>
+      <label>Reason for Request</label><textarea id="draan_reason" placeholder="Why does this matter? Safety, workflow, clarity, relationship, family need?"></textarea>
+      <label>Assert</label><textarea id="draan_assert" placeholder="Clear, direct statement of your concern or need."></textarea>
+      <label>Ask</label><textarea id="draan_ask" placeholder="Specific ask. What exactly are you requesting?"></textarea>
+      <label>Negotiate</label><textarea id="draan_negotiate" placeholder="Where can you be flexible? What options preserve the goal?"></textarea>
+      <label>Result / Follow-up</label><textarea id="draan_result"></textarea>
+      <label>Self-rating</label>
+      <select id="draan_rating"><option>1 - Poor</option><option>2</option><option>3 - Okay</option><option>4</option><option>5 - Strong</option></select>
+      <button onclick="saveDRAAN()">Save DRAAN</button>
+      <button class="light" onclick="clearDRAAN()">Clear</button>
+    </div>
+  </section>
+
+  <section id="basmarter" class="panel hidden">
+    <div class="card">
+      <h2>New BASMARTER Goal</h2>
+      <label>Goal Title</label><input id="bas_title" placeholder="Example: Pause before correcting staff">
+      <label>Behavior</label><textarea id="bas_behavior"></textarea>
+      <label>Action-oriented</label><textarea id="bas_action"></textarea>
+      <label>Specific</label><textarea id="bas_specific"></textarea>
+      <label>Measurable</label><textarea id="bas_measurable"></textarea>
+      <label>Achievable</label><textarea id="bas_achievable"></textarea>
+      <label>Relevant</label><textarea id="bas_relevant"></textarea>
+      <label>Time-bound</label><textarea id="bas_time"></textarea>
+      <label>Evaluated</label><textarea id="bas_evaluated"></textarea>
+      <label>Revised</label><textarea id="bas_revised"></textarea>
+      <button onclick="saveBAS()">Save Goal</button>
+      <button class="light" onclick="clearBAS()">Clear</button>
+    </div>
+  </section>
+
+  <section id="review" class="panel hidden">
+    <div class="card no-print">
+      <h2>Review Saved Entries</h2>
+      <input id="search" placeholder="Search by title, person, Rowen, staff, patient, etc." oninput="renderEntries()">
+      <div class="row">
+        <select id="filterType" onchange="renderEntries()">
+          <option value="">All types</option><option>CALM</option><option>DRAAN</option><option>BASMARTER</option>
+        </select>
+        <select id="sortOrder" onchange="renderEntries()">
+          <option value="newest">Newest first</option><option value="oldest">Oldest first</option>
+        </select>
+      </div>
+      <div class="actions">
+        <button onclick="window.print()">Print Current Review</button>
+        <button class="secondary" onclick="exportText()">Export Text Summary</button>
+      </div>
+    </div>
+    <div id="entries"></div>
+  </section>
+
+  <section id="settings" class="panel hidden">
+    <div class="card">
+      <h2>Backup / Restore</h2>
+      <p>Entries are stored locally on this device/browser. Export backups regularly, especially before clearing browser data or changing phones.</p>
+      <button onclick="exportJSON()">Export JSON Backup</button>
+      <label>Restore from JSON backup</label>
+      <input type="file" id="restoreFile" accept="application/json">
+      <button class="secondary" onclick="restoreJSON()">Restore</button>
+      <hr>
+      <button class="danger" onclick="deleteAll()">Delete All Entries</button>
+    </div>
+  </section>
+</main>
+
+<div class="footer no-print">Stored locally on this device. Use Export Backup for safekeeping.</div>
+
+<script>
+const KEY='vanderbilt_skills_tracker_v2';
+function entries(){return JSON.parse(localStorage.getItem(KEY)||'[]')}
+function setEntries(data){localStorage.setItem(KEY,JSON.stringify(data))}
+function nowDate(){return new Date().toLocaleString()}
+function val(id){return document.getElementById(id).value.trim()}
+function clearIds(ids){ids.forEach(id=>document.getElementById(id).value='')}
+
+function showTab(id,btn){
+ document.querySelectorAll('.panel').forEach(p=>p.classList.add('hidden'));
+ document.getElementById(id).classList.remove('hidden');
+ document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+ btn.classList.add('active');
+ if(id==='review') renderEntries();
+}
+
+function save(obj){let data=entries(); obj.id=Date.now(); obj.createdISO=new Date().toISOString(); obj.created=nowDate(); data.push(obj); setEntries(data); alert('Saved.');}
+
+function saveCALM(){
+ save({type:'CALM',title:val('calm_title'),person:val('calm_person'),rating:val('calm_rating'),fields:{
+ 'Trigger':val('calm_trigger'),'Connect':val('calm_connect'),'Assess':val('calm_assess'),'Lead':val('calm_lead'),'Manage':val('calm_manage'),'Outcome / Learning':val('calm_outcome')}});
+ clearCALM();
+}
+function clearCALM(){clearIds(['calm_title','calm_person','calm_trigger','calm_connect','calm_assess','calm_lead','calm_manage','calm_outcome'])}
+
+function saveDRAAN(){
+ save({type:'DRAAN',title:val('draan_title'),person:val('draan_person'),rating:val('draan_rating'),fields:{
+ 'Deposit':val('draan_deposit'),'Reason for Request':val('draan_reason'),'Assert':val('draan_assert'),'Ask':val('draan_ask'),'Negotiate':val('draan_negotiate'),'Result / Follow-up':val('draan_result')}});
+ clearDRAAN();
+}
+function clearDRAAN(){clearIds(['draan_title','draan_person','draan_deposit','draan_reason','draan_assert','draan_ask','draan_negotiate','draan_result'])}
+
+function saveBAS(){
+ save({type:'BASMARTER',title:val('bas_title'),person:'',rating:'',fields:{
+ 'Behavior':val('bas_behavior'),'Action-oriented':val('bas_action'),'Specific':val('bas_specific'),'Measurable':val('bas_measurable'),'Achievable':val('bas_achievable'),'Relevant':val('bas_relevant'),'Time-bound':val('bas_time'),'Evaluated':val('bas_evaluated'),'Revised':val('bas_revised')}});
+ clearBAS();
+}
+function clearBAS(){clearIds(['bas_title','bas_behavior','bas_action','bas_specific','bas_measurable','bas_achievable','bas_relevant','bas_time','bas_evaluated','bas_revised'])}
+
+function renderEntries(){
+ let q=val('search').toLowerCase(), type=val('filterType'), sort=val('sortOrder');
+ let data=entries().filter(e=>{
+  let blob=(e.type+' '+e.title+' '+e.person+' '+JSON.stringify(e.fields)).toLowerCase();
+  return (!type||e.type===type) && (!q||blob.includes(q));
+ });
+ data.sort((a,b)=> sort==='oldest'? a.id-b.id : b.id-a.id);
+ let div=document.getElementById('entries'); div.innerHTML='';
+ if(data.length===0){div.innerHTML='<div class="card"><p>No matching entries.</p></div>';return}
+ data.forEach(e=>{
+  let fieldHtml=Object.entries(e.fields||{}).filter(([k,v])=>v).map(([k,v])=>`<p><b>${escapeHTML(k)}:</b><br><pre>${escapeHTML(v)}</pre></p>`).join('');
+  let el=document.createElement('div'); el.className='card entry';
+  el.innerHTML=`<h3>${escapeHTML(e.title||'(Untitled)')}</h3>
+  <div class="meta"><span class="badge">${e.type}</span> ${escapeHTML(e.created||'')} ${e.person? ' • '+escapeHTML(e.person):''} ${e.rating? ' • Rating: '+escapeHTML(e.rating):''}</div>
+  ${fieldHtml}
+  <button class="light no-print" onclick="duplicateEntry(${e.id})">Duplicate</button>
+  <button class="danger no-print" onclick="deleteEntry(${e.id})">Delete</button>`;
+  div.appendChild(el);
+ });
+}
+
+function escapeHTML(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function deleteEntry(id){if(confirm('Delete this entry?')){setEntries(entries().filter(e=>e.id!==id));renderEntries()}}
+function duplicateEntry(id){let e=entries().find(x=>x.id===id); if(!e)return; let c=JSON.parse(JSON.stringify(e)); c.id=Date.now(); c.createdISO=new Date().toISOString(); c.created=nowDate(); c.title='Copy of '+(c.title||'Untitled'); let data=entries(); data.push(c); setEntries(data); renderEntries()}
+
+function exportJSON(){
+ let blob=new Blob([JSON.stringify(entries(),null,2)],{type:'application/json'});
+ download(blob,'vanderbilt_skills_backup.json');
+}
+function exportText(){
+ let text=entries().map(e=>{
+  let fields=Object.entries(e.fields||{}).map(([k,v])=>`${k}:\n${v}`).join('\n\n');
+  return `${e.type} - ${e.title}\n${e.created}${e.person?' | '+e.person:''}${e.rating?' | '+e.rating:''}\n\n${fields}\n\n---\n`;
+ }).join('\n');
+ download(new Blob([text],{type:'text/plain'}),'vanderbilt_skills_summary.txt');
+}
+function download(blob,name){let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click()}
+function restoreJSON(){
+ let f=document.getElementById('restoreFile').files[0]; if(!f){alert('Choose a backup file first.');return}
+ let r=new FileReader(); r.onload=()=>{try{let data=JSON.parse(r.result); if(!Array.isArray(data))throw Error(); setEntries(data); alert('Restored.');}catch(e){alert('Could not restore this file.')}}; r.readAsText(f);
+}
+function deleteAll(){if(confirm('Delete ALL entries on this device?')){localStorage.removeItem(KEY);alert('Deleted.');}}
+</script>
+</body>
+</html>
